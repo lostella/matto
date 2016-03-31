@@ -22,10 +22,6 @@ command | description
 `st <n>` | sets the search time to `<n>` seconds
 `perft <n>` | run the move generation test up to depth `<n>`
 
-## Known bugs
-
-* When you stop the search by issuing the `?` command, the input mechanism stops working
-
 ## To do
 
 * Fix bugs :-)
@@ -33,4 +29,3 @@ command | description
 * Make 100% [UCI](http://www.shredderchess.com/chess-info/features/uci-universal-chess-interface.html) compliant
 * Better evaluation function
 * Opening books
-* Implement a timer instead of checking time at every node
