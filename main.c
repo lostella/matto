@@ -13,53 +13,48 @@ int main(int argc, char* argv[]) {
   int result, game_over = 0;
   move m;
   
-  /* avvia il thread che acquisisce l'input*/
+  // start input thread
   i_start_input_thread();
   
-  /* inizializza la scacchiera */
+  // initialize board
   b_reset_board();
 
   do {
-    /* svuota il buffer di output */
+    // empty input buffer
     fflush(stdout);
 
-    /* attende input pieno */
+    // wait for full buffer
     i_p_full();
     
-    /* esamina l'input acquisito */
+    // parse the input string
     result = p_parse_input(i_get_buffer());
     
-    /* controlla l'esito dell'ultimo input */
     switch (result) {
-      // comando regolare
-      case RESULT_OK:
-        i_v_empty();
+      // wrong command
+      case RESULT_BADCOMMAND:
+        printf("error: %s\n", i_get_buffer());
         break;
-      // comando di uscita
+      // illegal move
+      case RESULT_BADMOVE:
+        printf("illegal move: %s\n", i_get_buffer());
+        break;
+    }
+    
+    i_v_empty();
+
+    switch (result) {
+      // exit command
       case RESULT_EXIT:
         game_over = 1;
         i_stop_input_thread();
         break;
-      // tocca al computer giocare
+      // computer should move
       case RESULT_GO:
-        i_v_empty();
         s_best_move(&m, 1);
         b_make_move(&m);
         printf("move %s\n", u_write_move(&m, c));
         break;
-      // comando errato
-      case RESULT_BADCOMMAND:
-        printf("error: %s\n", i_get_buffer());
-        i_v_empty();
-        break;
-      // mossa illegale
-      case RESULT_BADMOVE:
-        printf("illegal move: %s\n", i_get_buffer());
-        i_v_empty();
-        break;
     }
-    
-    /* comunica buffer vuoto */
     
   } while (!game_over);
 

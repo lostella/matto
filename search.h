@@ -3,7 +3,7 @@
 
 #include "board.h"
 
-#define TIME_CHECKS_PER_SECOND	30
+#define TIME_CHECKS_PER_SECOND	10
 #define DEFAULT_NPS				50000
 #define WINDOW					100
 #define DRAW					0

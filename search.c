@@ -88,8 +88,7 @@ int alphabeta_search(int alpha, int beta, int depth, move_set * moves, move_set 
 	else if (i_tryp_full() != EBUSY) {
 		if (strcmp(i_get_buffer(), "?\n") == 0)
 			abort_search = 1;
-		else
-			i_v_empty();
+		i_v_empty();
 	}
 	
 	if (abort_search) {
