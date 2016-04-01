@@ -1,6 +1,6 @@
 # Matto - a chess engine written in C
 
-Matto is a very simple chess engine I started writing ages ago when learning [the C programming language](http://s3-us-west-2.amazonaws.com/belllabs-microsite-dritchie/cbook/index.html). Hopefully I'll be able to start again working on it, fix its bugs, make it stronger and more usable.
+Matto is a very simple chess engine I started writing ages ago when learning [the C programming language](http://s3-us-west-2.amazonaws.com/belllabs-microsite-dritchie/cbook/index.html). Hopefully I will be able to fix it a bit, make it stronger and more usable.
 
 ## Build and run
 
@@ -24,6 +24,8 @@ command | description
 
 ## To do
 
+* Translate all comments in english
+* Comment, comment, comment
 * Fix bugs :-)
 * Use dynamically allocated structures (e.g. for the board)
 * Make 100% [UCI](http://www.shredderchess.com/chess-info/features/uci-universal-chess-interface.html) compliant
