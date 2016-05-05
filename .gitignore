@@ -1,0 +1,6 @@
+
+*.o
+
+matto
+
+matto.dSYM/Contents/Info.plist
