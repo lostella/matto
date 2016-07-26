@@ -23,7 +23,7 @@ piece	*	board[128];  /* the chessboard */
 
 /*
 	invalid positions                 valid positions
- 
+
 	127 126 125 124 123 122 121 120 | 119 118 117 116 115 114 113 112
 	111 110 109 108 107 106 105 104 | 103 102 101 100  99  98  97  96
 	 95  94  93  92  91  90  89  88 |  87  86  85  84  83  82  81  80
@@ -269,7 +269,7 @@ void b_generate_moves(move_set * mset) {
 		if (l == NONE)
 			continue;
 		if (pset[i].type & MOV_PAWN) {
-			/* PEDONE: bianco = {16, 32, 15, 17}, nero = {-16, -32, -15, -17} */
+			/* pawn: white = {16, 32, 15, 17}, black = {-16, -32, -15, -17} */
 			if (turn & WHITE) {
 				if (!((l+16) & 0x88) && board[l+16] == 0) {
 					b_insert_move(l, l+16, 1, mset);
@@ -291,11 +291,10 @@ void b_generate_moves(move_set * mset) {
 				if (!((l-17) & 0x88) && ((board[l-17] && board[l-17]->type & WHITE) || l-17 == en_passant[ply_counter]))
 					b_insert_move(l, l-17, 1, mset);
 			}
-			/* chi si muove come un pedone non si muove in altro modo :-) */
 			continue;
 		}
 		if (pset[i].type & MOV_L) {
-			/* CAVALLO: {33, 31, 14, 18, -18, -14, -31, -33} */
+			/* knight: {33, 31, 14, 18, -18, -14, -31, -33} */
 			if (!((l+33) & 0x88) && (board[l+33] == 0 || !(board[l+33]->type & turn)))
 				b_insert_move(l, l+33, 0, mset);
 			if (!((l+31) & 0x88) && (board[l+31] == 0 || !(board[l+31]->type & turn)))
@@ -312,7 +311,6 @@ void b_generate_moves(move_set * mset) {
 				b_insert_move(l, l-14, 0, mset);
 			if (!((l-18) & 0x88) && (board[l-18] == 0 || !(board[l-18]->type & turn)))
 				b_insert_move(l, l-18, 0, mset);
-			/* chi si muove come un cavallo non si muove in altro modo :-) */
 			continue;
 		}
 		if (pset[i].type & MOV_0_90) {
@@ -501,7 +499,7 @@ void b_generate_captures(move_set * mset) {
 		if (l == NONE)
 			continue;
 		if (pset[i].type & MOV_PAWN) {
-			/* PEDONE: bianco = {16, 32, 15, 17}, nero = {-16, -32, -15, -17} */
+			/* pawn: white = {16, 32, 15, 17}, black = {-16, -32, -15, -17} */
 			if (turn & WHITE) {
 				if (!((l+15) & 0x88) && ((board[l+15] && board[l+15]->type & BLACK) || l+15 == en_passant[ply_counter]))
 					b_insert_move(l, l+15, 1, mset);
@@ -513,11 +511,10 @@ void b_generate_captures(move_set * mset) {
 				if (!((l-17) & 0x88) && ((board[l-17] && board[l-17]->type & WHITE) || l-17 == en_passant[ply_counter]))
 					b_insert_move(l, l-17, 1, mset);
 			}
-			/* chi si muove come un pedone non si muove in altro modo :-) */
 			continue;
 		}
 		if (pset[i].type & MOV_L) {
-			/* CAVALLO: {33, 31, 14, 18, -18, -14, -31, -33} */
+			/* knight: {33, 31, 14, 18, -18, -14, -31, -33} */
 			if (!((l+33) & 0x88) && board[l+33] && (board[l+33]->type & (turn^BLACKORWHITE)))
 				b_insert_move(l, l+33, 0, mset);
 			if (!((l+31) & 0x88) && board[l+31] && (board[l+31]->type & (turn^BLACKORWHITE)))
@@ -534,7 +531,6 @@ void b_generate_captures(move_set * mset) {
 				b_insert_move(l, l-14, 0, mset);
 			if (!((l-18) & 0x88) && board[l-18] && (board[l-18]->type & (turn^BLACKORWHITE)))
 				b_insert_move(l, l-18, 0, mset);
-			/* chi si muove come un cavallo non si muove in altro modo :-) */
 			continue;
 		}
 		if (pset[i].type & MOV_0_90) {
@@ -797,21 +793,20 @@ void b_make_move(const move * m) {
 }
 
 void b_unmake_move() {
-	// decrementa il contatore se maggiore di zero
+	// just decrease counter if greater than zero
 	if (ply_counter-- == 0) {
 		ply_counter++;
 		return;
 	}
-	// inverti il turno
+	// change turn
 	turn ^= BLACKORWHITE;
-	// la mossa da annullare e' quella eseguita al turno precedente
 	move* m = &history[ply_counter];
-	// se si trattava di una promozione rimetti il pezzo a pedone
+	// undo promotion (put a pawn back)
 	if (m->promotion != NONE) {
 		board[m->to]->type &= BLACKORWHITE;
 		board[m->to]->type |= PAWN;
 	}
-	// esegui gli spostamenti al contrario
+	// make backwards moves
 	board[m->from] = board[m->to];
 	board[m->from]->location = m->from;
 	if (m->to == en_passant[ply_counter] && board[m->from]->type == (PAWN | turn)) {
@@ -830,25 +825,25 @@ void b_unmake_move() {
 		if (board[m->to])
 			board[m->to]->location = m->to;
 	}
-	/* si tratta di un arrocco corto bianco? */
+	/* is it a short white castle? */
 	if (m->from == 3 && m->to == 1 && (castle[ply_counter] & CASTLE_W_OO)) {
 		board[0] = board[2];
 		board[2] = 0;
 		board[0]->location = 0;
 	}
-	/* si tratta di un arrocco lungo bianco? */
+	/* is it a long white castle? */
 	else if (m->from == 3 && m->to == 5 && (castle[ply_counter] & CASTLE_W_OOO)) {
 		board[7] = board[4];
 		board[4] = 0;
 		board[7]->location = 7;
 	}
-	/* si tratta di un arrocco corto nero? */
+	/* is it a short black castle? */
 	else if (m->from == 115 && m->to == 113 && (castle[ply_counter] & CASTLE_B_OO)) {
 		board[112] = board[114];
 		board[114] = 0;
 		board[112]->location = 112;
 	}
-	/* si tratta di un arrocco lungo nero? */
+	/* is it a long black castle? */
 	else if (m->from == 115 && m->to == 117 && (castle[ply_counter] & CASTLE_B_OOO)) {
 		board[119] = board[116];
 		board[116] = 0;

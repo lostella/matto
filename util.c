@@ -4,19 +4,19 @@
 
 #include "board.h"
 
-/* Set the timer starting time */
+/* set the timer starting time */
 long u_start_timer() {
 	return clock();
 }
 
-/* Returns the time elapsed (in centiseconds) since the last startTimer call */
+/* returns the time elapsed (in centiseconds) since the last startTimer call */
 int u_stop_timer(long t0) {
 	return (clock()-t0)*100/CLOCKS_PER_SEC;
 }
 
 char * u_write_move(const move * m, char * s) {
-	sprintf(s, "%c%c%c%c",	
-		(8 - (m->from % 16)) - 1 + 'a', (m->from/16) + '1', 
+	sprintf(s, "%c%c%c%c",
+		(8 - (m->from % 16)) - 1 + 'a', (m->from/16) + '1',
 		(8 - (m->to % 16)) - 1 + 'a', (m->to/16) + '1');
 	if (m->promotion) {
 		switch (m->promotion) {
@@ -40,7 +40,7 @@ char * u_write_move(const move * m, char * s) {
 }
 
 int u_parse_move(const char * s, move * m) {
-	if (strlen(s) >= 4 && strlen(s) <= 5 && 
+	if (strlen(s) >= 4 && strlen(s) <= 5 &&
 			s[0] >= 'a' && s[0] <= 'h' && s[1] >= '1' && s[1] <= '8' &&
 	        s[2] >= 'a' && s[2] <= 'h' && s[3] >= '1' && s[3] <= '8') {
 		m->from = (s[1]-'1')*16+7-s[0]+'a';
@@ -93,9 +93,9 @@ void u_headsort(move_set * toSort, int r, int head) {
 		move m;
 		int i = 0, j = r, pivot = toSort->move[(i+j)/2].value;
 		do {
-			while (toSort->move[i].value > pivot) 
+			while (toSort->move[i].value > pivot)
 				i++;
-			while (toSort->move[j].value < pivot) 
+			while (toSort->move[j].value < pivot)
 				j--;
 			if (i<j) {
 				m = toSort->move[i];

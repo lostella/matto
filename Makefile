@@ -1,12 +1,30 @@
-CC = gcc
-CFLAGS = -O3
-OBJS = board.o input.o main.o protocol.o search.o util.o
+################################################################################
+### CUSTOMIZE BELOW HERE #######################################################
 
-all:	$(OBJS)
-		$(CC) -o matto -g -pthread $(OBJS)
+CC=gcc # define the compiler to use
+TARGET=matto # define the name of the executable
+SOURCES=main.c board.c input.c protocol.c search.c util.c
+CFLAGS=-O3
+LFLAGS=
 
-%.o:	%.c util.h
-		$(CC) -c -g $(CFLAGS) $< -o $@
+################################################################################
+### DO NOT EDIT THE FOLLOWING LINES ############################################
+
+# define list of objects
+OBJSC=$(SOURCES:.c=.o)
+OBJS=$(OBJSC:.cpp=.o)
+
+# the target is obtained linking all .o files
+all: $(SOURCES) $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CC) $(LFLAGS) $(OBJS) -o $(TARGET)
+
+purge: clean
+	rm -f $(TARGET)
 
 clean:
-	rm -f *.o *~ matto
+	rm -f *.o
+
+################################################################################
+################################################################################

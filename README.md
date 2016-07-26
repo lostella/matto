@@ -1,6 +1,6 @@
-# Matto - a chess engine written in C
+# Matto - a chess player written in C
 
-Matto is a very simple chess engine I started writing ages ago when learning [the C programming language](http://s3-us-west-2.amazonaws.com/belllabs-microsite-dritchie/cbook/index.html). Hopefully I will be able to fix it a bit, make it stronger and more usable.
+Matto is a very simple chess player I started writing ages ago when learning [the C programming language](http://s3-us-west-2.amazonaws.com/belllabs-microsite-dritchie/cbook/index.html). Hopefully I will be able to fix it a bit, make it stronger and more usable.
 
 ## Build and run
 

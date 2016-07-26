@@ -13,9 +13,9 @@ int exact_time = 1500;
 int exact_depth = 0;
 
 int time_left = 0;
-int level_moves = 0;	/* tot mosse (0 = tutta la partita) */
-int level_time = 0;		/* ogni tot centesimi di secondo */
-int level_inc = 0;		/* con tot centesimi di secondo di incremento ogni mossa */
+int level_moves = 0;
+int level_time = 0;
+int level_inc = 0;
 
 int ab_nodes;
 int q_nodes;
@@ -32,35 +32,35 @@ long start;
 int quiescent_search(int alpha, int beta) {
 	int i, val;
 	move_set moves;
-	
+
 	val = b_evaluate();
-	
-	if (val >= beta) 
+
+	if (val >= beta)
 		return beta;
-	if (val > alpha) 
+	if (val > alpha)
 		alpha = val;
-		
+
 	b_generate_captures(&moves);
-	
+
 	if (!moves.nmoves)
 		return val;
-	
+
 	b_sort_moves(&moves, FLAG_EVAL);
-	
+
 	for (i=0; i<moves.nmoves; i++) {
 		b_make_move(&moves.move[i]);
-		
+
 		if (b_under_check(b_get_turn()^BLACKORWHITE)) {
 			b_unmake_move();
 			continue;
 		}
-		
+
 		q_nodes++;
-		
+
 		val = -quiescent_search(-beta, -alpha);
-		
+
 		b_unmake_move();
-		
+
 		if (val >= beta) {
 			return beta;
 		}
@@ -76,10 +76,10 @@ int alphabeta_search(int alpha, int beta, int depth, move_set * moves, move_set 
 	move_set np_moves;
 	move_set np_variation;
 	int i, j, val, legal_moves = 0;
-	
+
 	ab_calls++;
-	
-	/* SOSTITUIRE QUESTO MECCANISMO CON UN TIMER??? */
+
+	/* substitute this with a timer? */
 	if (next_time_check-- <= 0) {
 		if (exact_time && u_stop_timer(start) >= exact_time)
 			abort_search = 1;
@@ -90,7 +90,7 @@ int alphabeta_search(int alpha, int beta, int depth, move_set * moves, move_set 
 			abort_search = 1;
 		i_v_empty();
 	}
-	
+
 	if (abort_search) {
 		variation->nmoves = 0;
 		return 0;
@@ -98,67 +98,65 @@ int alphabeta_search(int alpha, int beta, int depth, move_set * moves, move_set 
 
 	for (i=0; i<moves->nmoves; i++) {
 		b_make_move(&moves->move[i]);
-		
-		/* passa alla mossa successiva se questa non è legale */
+
+		/* go to next move if this one is illegal */
 		if (b_under_check(b_get_turn()^BLACKORWHITE)) {
 			b_unmake_move();
 			continue;
 		}
-		
+
 		legal_moves++;
 		ab_nodes++;
-		
-		/* controlla le condizioni di patta */
+
+		/* check for a draw game */
 		if (b_count_repetitions() >= 3 || b_get_fifty_counter() == 50) {
-			/* assegna il valore di patta alla mossa corrente */
 			val = DRAW;
 			np_variation.nmoves = 0;
 		}
-		/* si può ancora scendere nella ricerca */
+		/* we can go further down in the tree */
 		if (depth > 1) {
-			b_generate_moves(&np_moves);					/* genera le mosse per il livello successivo */
-			b_sort_moves(&np_moves, FLAG_EVAL);				/* valuta staticamente le mosse */
+			b_generate_moves(&np_moves); // generate next level moves
+			b_sort_moves(&np_moves, FLAG_EVAL);
 			val = -alphabeta_search(-beta, -alpha, depth-1, &np_moves, &np_variation);
 		}
-		/* è giunto il momento di valutare la posizione */
+		/* evaluate current position */
 		else {
 			val = -quiescent_search(-beta, -alpha);
 			np_variation.nmoves = 0;
 		}
-		
+
 		b_unmake_move();
-		
-		/* scendendo è stata terminata la ricerca */
+
 		if (abort_search) {
-			if (!i)					/* se è stata provata una sola mossa in questa posizione */
-				return INVALID;		/* allora non si può dire nulla su questo ramo */
-			break;					/* altrimenti interrompi la ricerca e ritorna l'alpha trovato */
+			if (!i)	// if only one move was tried in this position
+				return INVALID;	// then nothing can be said
+			break; // otherwise return the value found
 		}
-		
+
 		moves->move[i].value = val;
-		
-		/* mossa TROPPO forte, questa linea di gioco è da scartare */
+
+		/* too strong a move, branch */
 		if (val >= beta) {
 			killer_heuristic[b_get_ply_counter()] = moves->move[i];	/* annota la mossa che ha generato il taglio */
 			return beta;
 		}
-		/* abbiamo trovato una mossa migliore */
+		/* we found a better move */
 		if (val > alpha) {
 			alpha = val;
 			moves->move[i].value++;							/* in modo da riconoscere a livello superiore la mossa tra quelle di pari valore */
 			variation->move[0] = moves->move[i];			/* inserisce la mossa in testa alla linea di gioco di questo ramo */
 			for (j=0; j<np_variation.nmoves; j++)			/* e ci accoda la linea di gioco successiva alla mossa in testa */
-				variation->move[j+1] = np_variation.move[j];	
+				variation->move[j+1] = np_variation.move[j];
 			variation->nmoves = np_variation.nmoves+1;		/* imposta la lunghezza della variazione */
 		}
 	}
-	
-	/* se non ci sono mosse legali in questa posizione */
+
+	/* if there is no legal moves here */
 	if (!legal_moves) {
-		/* se il giocatore di turno è sotto scacco allora è matto*/
+		/* checkmate here */
 		if (b_under_check(b_get_turn()))
 			return -INFINITY;
-		/* altrimenti è stallo: patta */
+		/* draw here */
 		return DRAW;
 	}
 
@@ -179,10 +177,7 @@ void s_best_move(move * m, int output) {
 		else
 			exact_time = time_left/20 + level_inc/2;
 	}
-/*	else if (exact_time == 0 && exact_depth == 0) {
-		exact_time = 1500;
-	}
-*/	
+
 	ab_nodes = q_nodes = ab_calls = abort_search = 0;
 	next_time_check = (int)(nodes_per_second/TIME_CHECKS_PER_SECOND);
 	start = u_start_timer();
@@ -191,10 +186,10 @@ void s_best_move(move * m, int output) {
 	while (!abort_search) {
 		val = alphabeta_search(lower_bound, upper_bound, i, &moves, &variation);
 		b_sort_moves(&moves, FLAG_ALL);
-		
+
 		if (val == INVALID)
-			continue;		
-		
+			continue;
+
 		if (val <= lower_bound) {
 			lower_bound -= WINDOW;
 			continue;
@@ -203,10 +198,10 @@ void s_best_move(move * m, int output) {
 			upper_bound += WINDOW;
 			continue;
 		}
-		
+
 		lower_bound = val - WINDOW;
 		upper_bound = val + WINDOW;
-		
+
 		nodes_per_second = (int)((float)(100*(ab_nodes+q_nodes))/u_stop_timer(start));
 
 		if (output) {
@@ -216,9 +211,9 @@ void s_best_move(move * m, int output) {
 			printf("\n");
 			fflush(stdout);
 		}
-		
+
 		i++;
-		
+
 		if (val >= INFINITY-i || val <= -INFINITY+i)
 			abort_search = 1;
 		if (exact_depth && i > exact_depth)
