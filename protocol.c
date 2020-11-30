@@ -1,7 +1,7 @@
 #include <pthread.h>
-#include <string.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "board.h"
 #include "protocol.h"
@@ -12,8 +12,8 @@ int display_board = 0;
 int force_mode = 0;
 
 int p_parse_input(char s[]) {
-  char * token = NULL;
-  char * string = NULL;
+  char *token = NULL;
+  char *string = NULL;
   char delim[] = " ";
   move m;
   string = strtok(s, "\n");
@@ -24,10 +24,9 @@ int p_parse_input(char s[]) {
     int i;
     move_set ms;
     b_generate_moves(&ms);
-    for (i=0; i<ms.nmoves; i++) {
-      if (m.from == ms.move[i].from &&
-              m.to == ms.move[i].to &&
-              m.promotion == ms.move[i].promotion)
+    for (i = 0; i < ms.nmoves; i++) {
+      if (m.from == ms.move[i].from && m.to == ms.move[i].to &&
+          m.promotion == ms.move[i].promotion)
         break;
     }
     if (i == ms.nmoves) {
@@ -51,7 +50,7 @@ int p_parse_input(char s[]) {
     return RESULT_OK;
   }
   if (strcmp(token, "go") == 0) {
-    return RESULT_GO;    
+    return RESULT_GO;
   }
   if (strcmp(token, "undo") == 0) {
     b_unmake_move();
@@ -68,11 +67,10 @@ int p_parse_input(char s[]) {
     token = strtok(NULL, delim);
     if (strstr(token, ":")) {
       sscanf(token, "%d:%d", &minutes, &seconds);
-      seconds += minutes*60;
-    }
-    else {
+      seconds += minutes * 60;
+    } else {
       sscanf(token, "%d", &minutes);
-      seconds = minutes*60;
+      seconds = minutes * 60;
     }
     token = strtok(NULL, delim);
     sscanf(token, "%d", &inc);
@@ -110,7 +108,7 @@ int p_parse_input(char s[]) {
   if (strcmp(token, "perft") == 0) {
     int depth;
     unsigned int counter;
-    sscanf(token+6, "%d", &depth);
+    sscanf(token + 6, "%d", &depth);
     counter = s_perft(depth);
     printf("perft(%d) = %u\n", depth, counter);
     return RESULT_OK;
@@ -121,4 +119,3 @@ int p_parse_input(char s[]) {
   }
   return RESULT_BADCOMMAND;
 }
-
